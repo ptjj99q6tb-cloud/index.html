@@ -3,37 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Farm Dashboard with Chores Tabs</title>
+<title>Compact Farm Dashboard</title>
 <style>
-body { font-family: Arial; background:#cfe8cc; margin:0; padding:0; }
-header { background:#4a7c59; color:white; text-align:center; padding:15px; }
-.tabs { display:flex; background:#d3e0d0; }
-.tab { flex:1; padding:12px; text-align:center; cursor:pointer; font-weight:bold; }
+body { font-family: Arial; background:#cfe8cc; margin:0; padding:0; font-size:14px; }
+header { background:#4a7c59; color:white; text-align:center; padding:10px; }
+.tabs { display:flex; background:#d3e0d0; font-size:14px; }
+.tab { flex:1; padding:8px; text-align:center; cursor:pointer; font-weight:bold; }
 .tab.active { background:white; border-bottom:3px solid #4a7c59; }
-.content { display:none; padding:20px; }
+.content { display:none; padding:10px; }
 .content.active { display:block; }
-.subtabs { display:flex; margin-bottom:10px; }
-.subtab { flex:1; padding:8px; text-align:center; cursor:pointer; font-weight:bold; background:#e0e8de; border-radius:5px 5px 0 0; }
+.subtabs { display:flex; margin-bottom:5px; font-size:13px; }
+.subtab { flex:1; padding:5px; text-align:center; cursor:pointer; font-weight:bold; background:#e0e8de; border-radius:5px 5px 0 0; }
 .subtab.active { background:#fff; border-bottom:3px solid #4a7c59; }
-section { background:white; margin-bottom:15px; padding:15px; border-radius:10px; }
-button { background:#4a7c59; color:white; border:none; padding:10px; border-radius:8px; width:100%; margin-top:10px; cursor:pointer; }
+section { background:white; margin-bottom:10px; padding:10px; border-radius:8px; }
+button { background:#4a7c59; color:white; border:none; padding:8px; border-radius:6px; width:100%; margin-top:5px; cursor:pointer; font-size:14px; }
 button.reset { background:#b64545; }
-textarea { width:100%; height:80px; }
-table { width:100%; border-collapse: collapse; margin-top:15px; }
-th, td { border:1px solid #999; padding:5px; text-align:center; }
+textarea { width:100%; height:60px; font-size:13px; }
+table { width:100%; border-collapse: collapse; margin-top:5px; font-size:12px; }
+th, td { border:1px solid #999; padding:3px; text-align:center; }
 th { background:#4a7c59; color:white; }
+.table-container { overflow-x:auto; }
 </style>
 </head>
 <body>
 
 <header>
 <h1>🌾 Farm Dashboard</h1>
-<p>Submit tasks and view history</p>
+<p>Submit tasks & view history</p>
 </header>
 
 <!-- Main Tabs -->
 <div class="tabs">
-    <div class="tab active" onclick="openTab('formTab')">Submit Form</div>
+    <div class="tab active" onclick="openTab('formTab')">Form</div>
     <div class="tab" onclick="openTab('historyTab')">History</div>
 </div>
 
@@ -44,7 +45,7 @@ th { background:#4a7c59; color:white; }
     <div class="subtabs">
         <div class="subtab active" onclick="openSubTab('choresSub')">Chores</div>
         <div class="subtab" onclick="openSubTab('animalsSub')">Animals</div>
-        <div class="subtab" onclick="openSubTab('gatesSub')">Gates & Fences</div>
+        <div class="subtab" onclick="openSubTab('gatesSub')">Gates</div>
         <div class="subtab" onclick="openSubTab('notesSub')">Notes</div>
     </div>
 
@@ -68,7 +69,7 @@ th { background:#4a7c59; color:white; }
     </section>
     </div>
 
-    <!-- Gates & Fences Sub Tab -->
+    <!-- Gates Sub Tab -->
     <div id="gatesSub" class="content">
     <section>
         <label><input type="checkbox" id="allGatesClosed"> All gates closed</label><br>
@@ -85,13 +86,13 @@ th { background:#4a7c59; color:white; }
     </div>
 
     <button onclick="submitData()">✅ Submit</button>
-    <button class="reset" onclick="resetData()">🔁 Reset All History</button>
+    <button class="reset" onclick="resetData()">🔁 Reset History</button>
 
 </div>
 
 <!-- History Tab -->
 <div id="historyTab" class="content">
-<section>
+<section class="table-container">
 <h3>All Submissions</h3>
 <table id="historyTable">
 <thead>
@@ -124,16 +125,15 @@ function openTab(tabId) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
     event.target.classList.add('active');
-    if(tabId === 'formTab') displaySubTab('choresSub'); // default subtab
+    if(tabId === 'formTab') displaySubTab('choresSub');
 }
 
-// Sub tabs inside form
+// Sub tabs
 function openSubTab(subId) {
     displaySubTab(subId);
     document.querySelectorAll('.subtab').forEach(t => t.classList.remove('active'));
     event.target.classList.add('active');
 }
-
 function displaySubTab(subId) {
     document.querySelectorAll('#formTab .content').forEach(c => c.classList.remove('active'));
     document.getElementById(subId).classList.add('active');
@@ -156,11 +156,9 @@ function submitData() {
         noDamage: document.getElementById('noDamage').checked,
         notes: document.getElementById('notesArea').value
     };
-
     let history = JSON.parse(localStorage.getItem('farmHistory')) || [];
     history.push(data);
     localStorage.setItem('farmHistory', JSON.stringify(history));
-
     alert("✅ Submission added!");
     clearForm();
     displayHistory();
@@ -171,29 +169,29 @@ function displayHistory() {
     const tbody = document.getElementById('historyBody');
     tbody.innerHTML = "";
     const history = JSON.parse(localStorage.getItem('farmHistory')) || [];
-    history.forEach((entry, index) => {
+    history.forEach((entry,index)=>{
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${index+1}</td>
             <td>${entry.datetime}</td>
-            <td>${entry.feedAnimals ? '✅':'❌'}</td>
-            <td>${entry.checkWater ? '✅':'❌'}</td>
-            <td>${entry.cleanStalls ? '✅':'❌'}</td>
-            <td>${entry.equipmentCheck ? '✅':'❌'}</td>
-            <td>${entry.cowsOK ? '✅':'❌'}</td>
-            <td>${entry.horsesOK ? '✅':'❌'}</td>
-            <td>${entry.chickensOK ? '✅':'❌'}</td>
-            <td>${entry.sickInjured ? '✅':'❌'}</td>
-            <td>${entry.allGatesClosed ? '✅':'❌'}</td>
-            <td>${entry.fencesChecked ? '✅':'❌'}</td>
-            <td>${entry.noDamage ? '✅':'❌'}</td>
+            <td>${entry.feedAnimals?'✅':'❌'}</td>
+            <td>${entry.checkWater?'✅':'❌'}</td>
+            <td>${entry.cleanStalls?'✅':'❌'}</td>
+            <td>${entry.equipmentCheck?'✅':'❌'}</td>
+            <td>${entry.cowsOK?'✅':'❌'}</td>
+            <td>${entry.horsesOK?'✅':'❌'}</td>
+            <td>${entry.chickensOK?'✅':'❌'}</td>
+            <td>${entry.sickInjured?'✅':'❌'}</td>
+            <td>${entry.allGatesClosed?'✅':'❌'}</td>
+            <td>${entry.fencesChecked?'✅':'❌'}</td>
+            <td>${entry.noDamage?'✅':'❌'}</td>
             <td>${entry.notes}</td>
         `;
         tbody.appendChild(row);
     });
 }
 
-// Reset all history
+// Reset history
 function resetData() {
     if(confirm("Delete all submissions?")) {
         localStorage.removeItem('farmHistory');
@@ -203,14 +201,14 @@ function resetData() {
 
 // Clear form
 function clearForm() {
-    document.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = false);
-    document.getElementById('notesArea').value = "";
+    document.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked=false);
+    document.getElementById('notesArea').value="";
 }
 
-// Load history on page load
+// Load history
 window.onload = function() {
     displayHistory();
-    displaySubTab('choresSub'); // default subtab
+    displaySubTab('choresSub');
 };
 </script>
 
