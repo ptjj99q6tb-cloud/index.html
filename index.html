@@ -1,8 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Farm Dashboard with Chores Tabs</title>
+<style>
+body { font-family: Arial; background:#cfe8cc; margin:0; padding:0; }
+header { background:#4a7c59; color:white; text-align:center; padding:15px; }
+.tabs { display:flex; background:#d3e0d0; }
+.tab { flex:1; padding:12px; text-align:center; cursor:pointer; font-weight:bold; }
+.tab.active { background:white; border-bottom:3px solid #4a7c59; }
+.content { display:none; padding:20px; }
+.content.active { display:block; }
+.subtabs { display:flex; margin-bottom:10px; }
+.subtab { flex:1; padding:8px; text-align:center; cursor:pointer; font-weight:bold; background:#e0e8de; border-radius:5px 5px 0 0; }
+.subtab.active { background:#fff; border-bottom:3px solid #4a7c59; }
+section { background:white; margin-bottom:15px; padding:15px; border-radius:10px; }
+button { background:#4a7c59; color:white; border:none; padding:10px; border-radius:8px; width:100%; margin-top:10px; cursor:pointer; }
+button.reset { background:#b64545; }
+textarea { width:100%; height:80px; }
+table { width:100%; border-collapse: collapse; margin-top:15px; }
+th, td { border:1px solid #999; padding:5px; text-align:center; }
+th { background:#4a7c59; color:white; }
+</style>
+</head>
+<body>
+
+<header>
+<h1>🌾 Farm Dashboard</h1>
+<p>Submit tasks and view history</p>
+</header>
+
+<!-- Main Tabs -->
+<div class="tabs">
+    <div class="tab active" onclick="openTab('formTab')">Submit Form</div>
+    <div class="tab" onclick="openTab('historyTab')">History</div>
+</div>
+
+<!-- Form Tab -->
+<div id="formTab" class="content active">
+
+    <!-- Sub Tabs -->
+    <div class="subtabs">
+        <div class="subtab active" onclick="openSubTab('choresSub')">Chores</div>
+        <div class="subtab" onclick="openSubTab('animalsSub')">Animals</div>
+        <div class="subtab" onclick="openSubTab('gatesSub')">Gates & Fences</div>
+        <div class="subtab" onclick="openSubTab('notesSub')">Notes</div>
+    </div>
+
+    <!-- Chores Sub Tab -->
+    <div id="choresSub" class="content active">
+    <section>
+        <label><input type="checkbox" id="feedAnimals"> Feed animals</label><br>
+        <label><input type="checkbox" id="checkWater"> Check water</label><br>
+        <label><input type="checkbox" id="cleanStalls"> Clean stalls</label><br>
+        <label><input type="checkbox" id="equipmentCheck"> Equipment check</label><br>
+    </section>
+    </div>
+
+    <!-- Animals Sub Tab -->
+    <div id="animalsSub" class="content">
+    <section>
+        <label><input type="checkbox" id="cowsOK"> Cows OK</label><br>
+        <label><input type="checkbox" id="horsesOK"> Horses OK</label><br>
+        <label><input type="checkbox" id="chickensOK"> Chickens OK</label><br>
+        <label><input type="checkbox" id="sickInjured"> Sick/Injured noted</label><br>
+    </section>
+    </div>
+
+    <!-- Gates & Fences Sub Tab -->
+    <div id="gatesSub" class="content">
+    <section>
+        <label><input type="checkbox" id="allGatesClosed"> All gates closed</label><br>
+        <label><input type="checkbox" id="fencesChecked"> Fence lines checked</label><br>
+        <label><input type="checkbox" id="noDamage"> No breaks/damage</label><br>
+    </section>
+    </div>
+
+    <!-- Notes Sub Tab -->
+    <div id="notesSub" class="content">
+    <section>
+        <textarea id="notesArea" placeholder="Write anything important..."></textarea>
+    </section>
+    </div>
+
+    <button onclick="submitData()">✅ Submit</button>
+    <button class="reset" onclick="resetData()">🔁 Reset All History</button>
+
+</div>
+
 <!-- History Tab -->
 <div id="historyTab" class="content">
 <section>
 <h3>All Submissions</h3>
-<div class="table-container">
 <table id="historyTable">
 <thead>
 <tr>
@@ -24,27 +114,104 @@
 </thead>
 <tbody id="historyBody"></tbody>
 </table>
-</div>
 </section>
 </div>
 
-<style>
-/* Scrollable History Table */
-.table-container {
-  max-height: 300px;        /* table height */
-  overflow-y: auto;         /* vertical scroll */
-  overflow-x: auto;         /* horizontal scroll if needed */
+<script>
+// Main tabs
+function openTab(tabId) {
+    document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    event.target.classList.add('active');
+    if(tabId === 'formTab') displaySubTab('choresSub'); // default subtab
 }
-table { 
-  width: 100%; 
-  border-collapse: collapse; 
-  font-size:12px;           /* smaller text */
+
+// Sub tabs inside form
+function openSubTab(subId) {
+    displaySubTab(subId);
+    document.querySelectorAll('.subtab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
 }
-th, td { 
-  border:1px solid #999; 
-  padding:2px 4px;          /* smaller padding */
-  text-align:center;
-  white-space: nowrap;      /* prevent text wrap */
+
+function displaySubTab(subId) {
+    document.querySelectorAll('#formTab .content').forEach(c => c.classList.remove('active'));
+    document.getElementById(subId).classList.add('active');
 }
-th { background:#4a7c59; color:white; font-size:12px; }
-</style>
+
+// Submit data
+function submitData() {
+    const data = {
+        datetime: new Date().toLocaleString(),
+        feedAnimals: document.getElementById('feedAnimals').checked,
+        checkWater: document.getElementById('checkWater').checked,
+        cleanStalls: document.getElementById('cleanStalls').checked,
+        equipmentCheck: document.getElementById('equipmentCheck').checked,
+        cowsOK: document.getElementById('cowsOK').checked,
+        horsesOK: document.getElementById('horsesOK').checked,
+        chickensOK: document.getElementById('chickensOK').checked,
+        sickInjured: document.getElementById('sickInjured').checked,
+        allGatesClosed: document.getElementById('allGatesClosed').checked,
+        fencesChecked: document.getElementById('fencesChecked').checked,
+        noDamage: document.getElementById('noDamage').checked,
+        notes: document.getElementById('notesArea').value
+    };
+
+    let history = JSON.parse(localStorage.getItem('farmHistory')) || [];
+    history.push(data);
+    localStorage.setItem('farmHistory', JSON.stringify(history));
+
+    alert("✅ Submission added!");
+    clearForm();
+    displayHistory();
+
+// Display history
+function displayHistory() {
+    const tbody = document.getElementById('historyBody');
+    tbody.innerHTML = "";
+    const history = JSON.parse(localStorage.getItem('farmHistory')) || [];
+    history.forEach((entry, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${index+1}</td>
+            <td>${entry.datetime}</td>
+            <td>${entry.feedAnimals ? '✅':'❌'}</td>
+            <td>${entry.checkWater ? '✅':'❌'}</td>
+            <td>${entry.cleanStalls ? '✅':'❌'}</td>
+            <td>${entry.equipmentCheck ? '✅':'❌'}</td>
+            <td>${entry.cowsOK ? '✅':'❌'}</td>
+            <td>${entry.horsesOK ? '✅':'❌'}</td>
+            <td>${entry.chickensOK ? '✅':'❌'}</td>
+            <td>${entry.sickInjured ? '✅':'❌'}</td>
+            <td>${entry.allGatesClosed ? '✅':'❌'}</td>
+            <td>${entry.fencesChecked ? '✅':'❌'}</td>
+            <td>${entry.noDamage ? '✅':'❌'}</td>
+            <td>${entry.notes}</td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// Reset all history
+function resetData() {
+    if(confirm("Delete all submissions?")) {
+        localStorage.removeItem('farmHistory');
+        displayHistory();
+    }
+}
+
+// Clear form
+function clearForm() {
+    document.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = false);
+    document.getElementById('notesArea').value = "";
+}
+
+// Load history on page load
+window.onload = function() {
+    displayHistory();
+    displaySubTab('choresSub'); // default subtab
+};
+</script>
+
+</body>
+</html>
