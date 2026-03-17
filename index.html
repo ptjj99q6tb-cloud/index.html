@@ -2,10 +2,9 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tennis Dashboard</title>
+<title>Tennis Team App</title>
 
 <style>
-
 body{
 margin:0;
 font-family:-apple-system,BlinkMacSystemFont,"Segoe UI";
@@ -15,9 +14,10 @@ text-align:center;
 }
 
 .header{
-padding:16px;
+padding:15px;
 font-size:22px;
 font-weight:600;
+background:#000;
 }
 
 .map{
@@ -33,76 +33,200 @@ border-radius:12px;
 
 .court{
 position:absolute;
-border-radius:12px;
+border-radius:14px;
 display:flex;
 align-items:center;
 justify-content:center;
 font-weight:700;
-color:white;
 cursor:pointer;
+color:white;
 }
 
 /* COLORS */
-.open{ background:rgba(0,200,0,0.75); }
-.inuse{ background:rgba(220,0,0,0.85); }
+.open{ background:rgba(0,200,0,.75); }   /* green */
+.inuse{ background:rgba(220,0,0,.85); } /* red */
 
-/* TOP COURTS */
+/* COURT POSITIONS */
 #c1{ top:14%; left:28%; width:90px; height:140px; }
 #c2{ top:14%; left:52%; width:90px; height:140px; }
 
-/* BOTTOM COURTS */
 #c3{ top:55%; left:15%; width:80px; height:130px; }
 #c4{ top:55%; left:33%; width:80px; height:130px; }
 #c5{ top:55%; left:51%; width:80px; height:130px; }
 #c6{ top:55%; left:69%; width:80px; height:130px; }
 
+.panel{
+background:#1c1c1e;
+padding:15px;
+margin-top:10px;
+}
+
+.roster{
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+justify-content:center;
+}
+
+.player{
+background:#007aff;
+padding:6px 10px;
+border-radius:8px;
+cursor:pointer;
+}
+
+button{
+padding:8px 12px;
+border:none;
+border-radius:8px;
+margin:5px;
+font-weight:600;
+}
+
+.start{background:#34c759;}
+.clear{background:#ff3b30;}
+.rotate{background:#ff9500;}
+
+.timer{
+font-size:20px;
+margin-top:8px;
+}
 </style>
 </head>
 
 <body>
 
-<div class="header">
-🎾 Tennis Courts
-</div>
+<div class="header">🎾 Tennis Practice</div>
 
 <div class="map">
 
-<img src="courts.png">
+<!-- YOUR IMAGE (EMBEDDED) -->
+<img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD/...PASTE YOUR FULL STRING HERE...">
 
-<div id="c1" class="court open" onclick="tapCourt(1)">1</div>
-<div id="c2" class="court open" onclick="tapCourt(2)">2</div>
+<div id="c1" class="court open" onclick="selectCourt(1)">1</div>
+<div id="c2" class="court open" onclick="selectCourt(2)">2</div>
 
-<div id="c3" class="court open" onclick="tapCourt(3)">3</div>
-<div id="c4" class="court open" onclick="tapCourt(4)">4</div>
-<div id="c5" class="court open" onclick="tapCourt(5)">5</div>
-<div id="c6" class="court open" onclick="tapCourt(6)">6</div>
+<div id="c3" class="court open" onclick="selectCourt(3)">3</div>
+<div id="c4" class="court open" onclick="selectCourt(4)">4</div>
+<div id="c5" class="court open" onclick="selectCourt(5)">5</div>
+<div id="c6" class="court open" onclick="selectCourt(6)">6</div>
+
+</div>
+
+<div class="panel">
+
+<div>Selected Court: <b id="selected">None</b></div>
+
+<div class="roster" id="roster"></div>
+
+<div>
+<button class="start" onclick="startMatch()">Start</button>
+<button class="clear" onclick="clearCourt()">Clear</button>
+<button class="rotate" onclick="rotate()">Rotate</button>
+</div>
+
+<div class="timer" id="timer">00:00</div>
 
 </div>
 
 <script>
 
+let players=[
+"Parker","Daniel","Emma","Ava","Lucas",
+"Olivia","Ethan","Sophia","Noah","Mason"
+]
+
 let courts={}
+let selected=null
+let time=0
+let interval=null
 
-function tapCourt(n){
+function loadRoster(){
+let r=document.getElementById("roster")
+players.forEach(p=>{
+let el=document.createElement("div")
+el.className="player"
+el.innerText=p
+el.onclick=()=>addPlayer(p)
+r.appendChild(el)
+})
+}
 
-let el=document.getElementById("c"+n)
+function selectCourt(n){
+selected=n
+document.getElementById("selected").innerText=n
+}
 
-if(courts[n]){
-if(confirm("Clear Court "+n+"?")){
-courts[n]=null
+function addPlayer(name){
+if(!selected)return
+if(!courts[selected]) courts[selected]=[]
+courts[selected].push(name)
+
+let el=document.getElementById("c"+selected)
+el.classList.remove("open")
+el.classList.add("inuse")
+
+save()
+}
+
+function clearCourt(){
+if(!selected)return
+courts[selected]=null
+
+let el=document.getElementById("c"+selected)
 el.classList.remove("inuse")
 el.classList.add("open")
+
+save()
 }
-}else{
-let players=prompt("Enter players (ex: Parker vs Daniel)")
-if(players){
-courts[n]=players
+
+function startMatch(){
+clearInterval(interval)
+time=0
+
+interval=setInterval(()=>{
+time++
+let m=Math.floor(time/60).toString().padStart(2,"0")
+let s=(time%60).toString().padStart(2,"0")
+document.getElementById("timer").innerText=m+":"+s
+},1000)
+}
+
+function rotate(){
+let keys=Object.keys(courts)
+if(keys.length<2)return
+
+let first=courts[keys[0]]
+
+for(let i=0;i<keys.length-1;i++){
+courts[keys[i]]=courts[keys[i+1]]
+}
+
+courts[keys[keys.length-1]]=first
+
+save()
+}
+
+function save(){
+localStorage.setItem("courts",JSON.stringify(courts))
+}
+
+function load(){
+let data=localStorage.getItem("courts")
+if(data){
+courts=JSON.parse(data)
+Object.keys(courts).forEach(c=>{
+if(courts[c]){
+let el=document.getElementById("c"+c)
 el.classList.remove("open")
 el.classList.add("inuse")
 }
+})
+}
 }
 
-}
+loadRoster()
+load()
 
 </script>
 
